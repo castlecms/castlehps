@@ -1,0 +1,71 @@
+Changelog for castlehps
+=======================
+
+1.0.11 (unreleased)
+------------------
+
+- Another CORS fix
+
+
+1.0.10 (2016-08-22)
+------------------
+
+- fix CORS checking
+
+1.0.9 (2016-08-01)
+------------------
+
+- strip out images from default search results
+
+1.0.8 (2016-07-12)
+------------------
+
+- fix portal_type query to handle multiple values in an OR query
+
+1.0.7 (2016-07-02)
+------------------
+
+- switch to using web module so we get some web application goodies for free
+  like 404, 500 messages
+
+1.0.6 (2016-06-22)
+------------------
+
+- be able to search crawled sites
+
+1.0.5 (2016-06-22)
+------------------
+
+- support for portal_type
+- better SearchableText query
+
+1.0.4 (2016-06-20)
+------------------
+
+- Upgrade to use latest scoring script
+  [vangheem]
+
+1.0.3 (2016-06-20)
+------------------
+
+- add loglevel configuration for sentry reporting
+- adjust log level of some messages
+
+
+1.0.2 (2016-06-06)
+------------------
+
+- fix missing object for accessing sentry dsn
+
+
+1.0.1 (2016-06-06)
+------------------
+
+- changed underscore to hyphen for sentry related command line parameters to
+  keep consistent with others
+
+
+1.0.0 (2016-06-06)
+------------------
+
+- initial release, forked from client specific python 2.x/3.x service
