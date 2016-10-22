@@ -1,0 +1,14 @@
+*.pyc
+*.pyo
+env
+bin
+lib
+*.egg-info
+dist
+build
+cache/
+.eggs/
+default_config.ini
+example-query.json
+include
+pip-selfcheck.json

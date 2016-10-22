@@ -24,16 +24,6 @@ suggest_base = {
     }
 }
 
-_allowed_origins = (
-    '127.0.0.1',
-    'localhost',
-    '10.3.3.30',
-    'api.fbi.gov',
-    'www.fbi.gov',
-    'bankrobbers.fbi.gov',
-)
-
-
 base_query = {
     "query": {
         "function_score": {
