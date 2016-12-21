@@ -4,6 +4,8 @@ Changelog for castlehps
 1.0.11 (unreleased)
 ------------------
 
+- do not allow paging more than 10000
+
 - Another CORS fix
 
 

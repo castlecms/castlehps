@@ -1,16 +1,11 @@
 import configparser
 from aioes import Elasticsearch
-from aioes.exception import ConnectionError
-from aioes.exception import RequestError
-from aioes.exception import TransportError
 from aiohttp import MultiDict
 from aiohttp import web
-from copy import deepcopy
 from urllib.parse import parse_qsl
 from urllib.parse import urljoin
 from urllib.parse import urlparse
 
-import aiohttp.server
 import argparse
 import json
 import logging
@@ -26,6 +21,19 @@ def _one(val):
     if val and type(val) == list and len(val) == 1:
         val = val[0]
     return val
+
+
+def apply_cors(req, response):
+    settings = req.app.settings
+    req_headers = req.headers
+    origin = req_headers.get('origin')
+    if origin:
+        host, _, _ = urlparse(origin).netloc.partition(':')
+        if host in settings['allowed_origins']:
+            response.headers['Access-Control-Allow-Origin'] = origin
+        else:
+            # provide valid default origin
+            response.headers['Access-Control-Allow-Origin'] = settings['default_allowed_origin']
 
 
 async def handle_search(req):
@@ -45,17 +53,27 @@ async def handle_search(req):
     except:
         page = 1
 
+    params = parser.params(get_params, page)
+    if (params['size'] + params['from_']) >= 10000:
+        response = web.Response(body=json.dumps({
+            'status': 'error',
+            'message': 'paging not allowed past 10000'
+        }).encode('utf-8'))
+        response.headers['Content-Type'] = 'application/json'
+        apply_cors(req, response)
+        return response
+
     bypass = False
+    conn = Elasticsearch(
+        endpoints=settings['elasticsearch_hosts'],
+        sniffer_timeout=0.5)
     try:
         if qs:
-            conn = Elasticsearch(
-                endpoints=settings['elasticsearch_hosts'],
-                sniffer_timeout=0.5)
             results = await conn.search(
                 index=settings['index'],
                 doc_type=doc_type,
                 body=parser.query(get_params),
-                **parser.params(get_params, page))
+                **params)
             conn.close()  # can we share a cache of connection objects instead?
             count = results['hits']['total']
             try:
@@ -68,6 +86,8 @@ async def handle_search(req):
     except:
         bypass = True
         logger.error('Error with query', exc_info=True)
+    finally:
+        conn.close()
 
     if bypass:
         results = []
@@ -111,16 +131,7 @@ async def handle_search(req):
     })
     response = web.Response(body=json_resp.encode('utf-8'))
     response.headers['Content-Type'] = 'application/json'
-
-    req_headers = req.headers
-    origin = req_headers.get('origin')
-    if origin:
-        host, _, _ = urlparse(origin).netloc.partition(':')
-        if host in settings['allowed_origins']:
-            response.headers['Access-Control-Allow-Origin'] = origin
-        else:
-            # provide valid default origin
-            response.headers['Access-Control-Allow-Origin'] = settings['default_allowed_origin']
+    apply_cors(req, response)
 
     return response
 
